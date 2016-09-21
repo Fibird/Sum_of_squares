@@ -73,10 +73,11 @@ int main()
 	{
 		c += arr[i] * arr[i];
 	}
+	float correct_result = ((float)N) * ((float)(N + 1)) * ((float)(2 * N + 1)) / 6;
 	printf("The result of GPU is:\t%lf\n", result[0]);
 	printf("The result of CPU is:\t%lf\n", c);
-	printf("The correct result is:\t%lf\n", ((float)N) * ((float)(N + 1)) * ((float)(2 * N + 1)) / 6);
-
+	printf("The correct result is:\t%lf\n", correct_result);
+	printf("The deviation produced by CPU & GPU separately is %lf, %lf\n", correct_result - c, correct_result - result[0]);
 	free(result);
 	free(arr);
 	cudaFree(dev_result);
