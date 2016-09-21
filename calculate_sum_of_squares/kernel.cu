@@ -68,9 +68,14 @@ int main()
 	{
 		result[0] += result[i];
 	}
-
-	printf("The result of computer is: %lf\n", result[0]);
-	printf("The correct result is: %lf\n", ((float)N) * ((float)(N + 1)) * ((float)(2 * N + 1)) / 6);
+	float c = 0;
+	for (int i = 0; i < N; i++)
+	{
+		c += arr[i] * arr[i];
+	}
+	printf("The result of GPU is:\t%lf\n", result[0]);
+	printf("The result of CPU is:\t%lf\n", c);
+	printf("The correct result is:\t%lf\n", ((float)N) * ((float)(N + 1)) * ((float)(2 * N + 1)) / 6);
 
 	free(result);
 	free(arr);
