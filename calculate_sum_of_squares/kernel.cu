@@ -22,7 +22,7 @@ __global__ void addKernel(const float *a, float *result)
 	// to corresponding position in cache_result which is in
 	// shared memory
 	cache_result[threadIdx.x] = temp;
-
+	__syncthreads();
 	// Uses Reduction to get the sum of array cache_result 
 	// corresponding to each block
 	int i = blockDim.x / 2;
@@ -35,7 +35,6 @@ __global__ void addKernel(const float *a, float *result)
 		__syncthreads();
 		i /= 2;
 	}
-	__syncthreads();
 	// Saves the sum to the corresponding position of array result
 	// using a thread whose id is 0
 	if (threadIdx.x == 0)
