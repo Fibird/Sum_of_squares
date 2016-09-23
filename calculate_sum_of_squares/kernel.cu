@@ -2,6 +2,7 @@
 #include "device_launch_parameters.h"
 
 #include <stdio.h>
+#include <ctime>
 
 #define N 54 * 1024
 #define threadsPerBlock 256
@@ -47,6 +48,12 @@ int main()
 {
 	float *arr, *result;
 	float *dev_arr, *dev_result;
+	// Get the time of computing in GPU
+	cudaEvent_t g_start, g_stop;
+	cudaEventCreate(&g_start);
+	cudaEventCreate(&g_stop);
+	// Get the time of computing in CPU
+	clock_t c_start, c_stop;
 
 	arr = (float *)malloc(N * sizeof(float));
 	result = (float *)malloc(blocksPerGrid * sizeof(float));
@@ -55,8 +62,10 @@ int main()
 
 	for (int i = 0; i < N; i++)
 	{
-		arr[i] = i + 1;
+		arr[i] = (float)i + 1;
 	}
+
+	cudaEventRecord(g_start, 0);
 	cudaMemcpy(dev_arr, arr, N * sizeof(float), cudaMemcpyHostToDevice);
 
 	addKernel<<<blocksPerGrid, threadsPerBlock>>>(dev_arr, dev_result);
@@ -67,16 +76,30 @@ int main()
 	{
 		result[0] += result[i];
 	}
+	cudaEventRecord(g_stop, 0);
+	cudaEventSynchronize(g_stop);
+	float GPUelapsedTime;
+	cudaEventElapsedTime(&GPUelapsedTime, g_start, g_stop);
+	// Get the result using CPU
+	double CPUelapsedTime;
+	c_start = clock();
 	float c = 0;
 	for (int i = 0; i < N; i++)
 	{
 		c += arr[i] * arr[i];
 	}
+	c_stop = clock();
+	CPUelapsedTime = ((double)(c_stop - c_start)) / (CLOCKS_PER_SEC * 1000);
 	float correct_result = ((float)N) * ((float)(N + 1)) * ((float)(2 * N + 1)) / 6;
 	printf("The result of GPU is:\t%lf\n", result[0]);
 	printf("The result of CPU is:\t%lf\n", c);
 	printf("The correct result is:\t%lf\n", correct_result);
 	printf("The deviation produced by CPU & GPU separately is %lf, %lf\n", correct_result - c, correct_result - result[0]);
+	printf("Time in GPU: %lfms\n", GPUelapsedTime);
+	printf("Time in CPU: %fms\n", CPUelapsedTime);
+
+	cudaEventDestroy(g_start);
+	cudaEventDestroy(g_stop);
 	free(result);
 	free(arr);
 	cudaFree(dev_result);
