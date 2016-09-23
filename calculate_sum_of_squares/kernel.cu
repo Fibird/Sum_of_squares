@@ -65,9 +65,9 @@ int main()
 		arr[i] = (float)i + 1;
 	}
 
-	cudaEventRecord(g_start, 0);
+	//cudaEventRecord(g_start, 0);
 	cudaMemcpy(dev_arr, arr, N * sizeof(float), cudaMemcpyHostToDevice);
-
+	cudaEventRecord(g_start, 0);
 	addKernel<<<blocksPerGrid, threadsPerBlock>>>(dev_arr, dev_result);
 
 	cudaMemcpy(result, dev_result, blocksPerGrid * sizeof(float), cudaMemcpyDeviceToHost);
